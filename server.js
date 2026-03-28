@@ -6,12 +6,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. CONEXIÓN A MYSQL
+// 1. CONEXIÓN A MYSQL (AHORA EN LA NUBE)
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'trablusmodas_db',
+    host: 'proyectotrablus-tomasfarib.l.aivencloud.com', 
+    port: 19566, // ¡Recuerda, el puerto va como número, SIN comillitas!
+    user: 'avnadmin', // El que acabas de encontrar (suele ser avnadmin)
+    password: process.env.DB_PASSWORD, // ¡Magia! Render leerá la contraseña real en secreto
+    database: 'defaultdb', // Por lo general Aiven usa este nombre
+    ssl: {
+        rejectUnauthorized: false // ¡Clave para que la nube nos deje entrar!
+    },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -47,6 +51,27 @@ app.post('/api/comprar', async (req, res) => {
 // ============================================================================
 // 3. ENDPOINTS PRIVADOS (PANEL DE ADMINISTRADOR)
 // ============================================================================
+
+// RUTA SECRETA PARA CREAR LA TABLA EN LA NUBE
+app.get('/crear-tablas', (req, res) => {
+    const sql = `CREATE TABLE IF NOT EXISTS productos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre VARCHAR(255) NOT NULL,
+        precio DECIMAL(10,2) NOT NULL,
+        stock INT NOT NULL,
+        categoria VARCHAR(100),
+        talle VARCHAR(50),
+        imagen_url VARCHAR(500)
+    )`;
+    
+    db.query(sql, (err, result) => {
+        if (err) {
+            console.error('Error al crear la tabla:', err);
+            return res.send('Hubo un error al crear la tabla: ' + err.message);
+        }
+        res.send('🎉 ¡Éxito! La tabla de productos se creó perfectamente en Aiven.');
+    });
+});
 
 // A. LEER el inventario (Ahora trae la imagen)
 app.get('/api/admin/productos', async (req, res) => {
