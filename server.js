@@ -6,13 +6,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. CONEXIÓN A MYSQL (CON LLAVE MAESTRA Y DETECTOR)
-console.log("🔍 Revisando llaves de conexión...");
-if (!process.env.DATABASE_URL) {
-    console.error("🚨 ALERTA ROJA: Render NO está leyendo la variable DATABASE_URL");
-} else {
-    console.log("✅ Render encontró la llave maestra (ocultando contraseña por seguridad)");
-}
+// 1. CONEXIÓN A MYSQL (LA DEFINITIVA)
+const db = mysql.createPool(process.env.DATABASE_URL);
+
+console.log("🔍 Intentando conectar con el enlace oficial de Aiven...");
 
 const db = mysql.createPool({
     uri: process.env.DATABASE_URL, 
