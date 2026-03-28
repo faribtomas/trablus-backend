@@ -6,15 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. CONEXIÓN A MYSQL (AHORA EN LA NUBE)
+// 1. CONEXIÓN A MYSQL (CON LLAVE MAESTRA)
 const db = mysql.createPool({
-    host: 'proyectotrablus-tomasfarib.l.aivencloud.com', 
-    port: 19566, // ¡Recuerda, el puerto va como número, SIN comillitas!
-    user: 'avnadmin', // El que acabas de encontrar (suele ser avnadmin)
-    password: process.env.DB_PASSWORD, // ¡Magia! Render leerá la contraseña real en secreto
-    database: 'defaultdb', // Por lo general Aiven usa este nombre
+    uri: process.env.DATABASE_URL, // Render le inyectará el enlace completo
     ssl: {
-        rejectUnauthorized: false // ¡Clave para que la nube nos deje entrar!
+        rejectUnauthorized: false
     },
     waitForConnections: true,
     connectionLimit: 10,
