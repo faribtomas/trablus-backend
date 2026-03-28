@@ -1,26 +1,26 @@
+require('dotenv').config(); // 1. Agregado para leer process.env
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-// (y cualquier otra cosa que tengas al principio...)
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. CONEXIÓN A MYSQL (ÚNICA Y DEFINITIVA)
-const db = mysql.createPool(process.env.DATABASE_URL);
+// 1. CONEXIÓN A MYSQL (ÚNICA Y DEFINITIVA - AHORA CON PROMESAS)
+const db = mysql.createPool(process.env.DATABASE_URL).promise(); 
 console.log("🔍 Intentando conectar con el enlace oficial de Aiven...");
 
-// ... y a partir de acá ya siguen tus rutas de los productos (app.get...)
-
-db.getConnection((err, connection) => {
-    if (err) {
-        console.error('❌ Error de conexión a la BD:', err.message);
-    } else {
+// Verificación de conexión actualizada para promesas
+(async () => {
+    try {
+        const connection = await db.getConnection();
         console.log('✅ Conectado a la base de datos MySQL de TRABLUSmodas en la Nube');
-        connection.release(); // Esto devuelve la conexión para que no se trabe
+        connection.release(); // Devuelve la conexión
+    } catch (err) {
+        console.error('❌ Error de conexión a la BD:', err.message);
     }
-});
+})();
 
 // 2. ENDPOINT PÚBLICO (COMPRAR)
 app.post('/api/comprar', async (req, res) => {
@@ -50,27 +50,14 @@ app.post('/api/comprar', async (req, res) => {
 // ============================================================================
 
 // RUTA SECRETA PARA CREAR LA TABLA EN LA NUBE
-app.get('/crear-tablas', (req, res) => {
-    const sql = `CREATE TABLE IF NOT EXISTS productos (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nombre VARCHAR(255) NOT NULL,
-        precio DECIMAL(10,2) NOT NULL,
-        stock INT NOT NULL,
-        categoria VARCHAR(100),
-        talle VARCHAR(50),
-        imagen_url VARCHAR(500)
-    )`;
-    
-    db.query(sql, (err, result) => {
-        if (err) {
-            console.error('Error al crear la tabla:', err);
-            return res.send('Hubo un error al crear la tabla: ' + err.message);
-        }
-        res.send('🎉 ¡Éxito! La tabla de productos se creó perfectamente en Aiven.');
-    });
+// ADVERTENCIA: Esta ruta creaba 'productos' plana, pero tus endpoints usan 'products' y 'product_variants'. 
+// Lo ideal es que crees las tablas relacionales correctas desde tu cliente SQL (como DBeaver o Workbench). 
+// He adaptado este endpoint para que devuelva un aviso en lugar de crear una tabla incorrecta.
+app.get('/crear-tablas', async (req, res) => {
+    res.send('⚠️ Aviso: Las tablas deben ser "products", "categories" y "product_variants". Por favor, créalas manualmente en tu gestor SQL con sus respectivas relaciones.');
 });
 
-// A. LEER el inventario (Ahora trae la imagen)
+// A. LEER el inventario 
 app.get('/api/admin/productos', async (req, res) => {
     try {
         const sql = `
@@ -88,12 +75,11 @@ app.get('/api/admin/productos', async (req, res) => {
     }
 });
 
-// B. CREAR nueva prenda (Ahora recibe la imagen)
+// B. CREAR nueva prenda 
 app.post('/api/admin/productos', async (req, res) => {
     try {
         const { name, price, category_id, size, stock, imageUrl } = req.body;
         
-        // Usamos una imagen genérica si el usuario deja el casillero vacío
         const finalImage = imageUrl || 'https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?auto=format&fit=crop&q=80&w=800';
 
         let productId;
