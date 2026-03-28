@@ -21,9 +21,14 @@ const db = mysql.createPool({
     queueLimit: 0
 });
 
-db.getConnection()
-    .then(() => console.log('✅ Conectado a la base de datos MySQL de TRABLUSmodas'))
-    .catch(err => console.error('❌ Error de conexión a la BD:', err.message));
+db.getConnection((err, connection) => {
+    if (err) {
+        console.error('❌ Error de conexión a la BD:', err.message);
+    } else {
+        console.log('✅ Conectado a la base de datos MySQL de TRABLUSmodas en la Nube');
+        connection.release(); // Esto devuelve la conexión para que no se trabe
+    }
+});
 
 // 2. ENDPOINT PÚBLICO (COMPRAR)
 app.post('/api/comprar', async (req, res) => {
