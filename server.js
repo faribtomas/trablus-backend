@@ -1,25 +1,17 @@
 const express = require('express');
-const cors = require('cors');
 const mysql = require('mysql2');
+const cors = require('cors');
+// (y cualquier otra cosa que tengas al principio...)
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1. CONEXIÓN A MYSQL (LA DEFINITIVA)
+// 1. CONEXIÓN A MYSQL (ÚNICA Y DEFINITIVA)
 const db = mysql.createPool(process.env.DATABASE_URL);
-
 console.log("🔍 Intentando conectar con el enlace oficial de Aiven...");
 
-const db = mysql.createPool({
-    uri: process.env.DATABASE_URL, 
-    ssl: {
-        rejectUnauthorized: false
-    },
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+// ... y a partir de acá ya siguen tus rutas de los productos (app.get...)
 
 db.getConnection((err, connection) => {
     if (err) {
