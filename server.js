@@ -147,6 +147,6 @@ app.delete('/api/admin/productos/:variantId', async (req, res) => {
 
 // 4. INICIAR EL SERVIDOR
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor Backend corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor Backend corriendo en puerto ${PORT}`);
 });
