@@ -18,7 +18,7 @@ const db = mysql.createPool({
   database: process.env.MYSQL_DATABASE,
   ssl: { rejectUnauthorized: false }
 }).promise();
-console.log("🔍 Intentando conectar con el enlace oficial de Aiven...");
+console.log("🔍 Conectando a:", process.env.MYSQL_HOST, process.env.MYSQL_PORT);
 
 // Verificación de conexión actualizada para promesas
 (async () => {
