@@ -10,7 +10,10 @@ app.use(cors());
 app.use(express.json());
 
 // 1. CONEXIÓN A MYSQL (ÚNICA Y DEFINITIVA - AHORA CON PROMESAS)
-const db = mysql.createPool(process.env.DATABASE_URL).promise(); 
+const db = mysql.createPool({
+  uri: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+}).promise();
 console.log("🔍 Intentando conectar con el enlace oficial de Aiven...");
 
 // Verificación de conexión actualizada para promesas
